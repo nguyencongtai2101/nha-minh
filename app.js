@@ -74,6 +74,7 @@ $("btn-save-name").onclick = () => {
 // ---------- Màn hình chính ----------
 async function enterMain() {
   show("scr-main");
+  keepInUrl();
   $("home-name").textContent = CFG.tenNha || "Nhà mình";
   $("demo-banner").classList.toggle("hidden", hasFirebase);
   if (!backend) {
@@ -112,13 +113,53 @@ $("btn-share").onclick = async () => {
   catch { toast("Bấm giữ vào link ở trên để chép"); }
 };
 
-$("btn-create").onclick = () => { code = newCode(); store.set("nha", code); showNameScreen(); };
+$("btn-create").onclick = () => {
+  if (!confirm("Chỉ tạo nhóm mới nếu nhà mình CHƯA có nhóm. Nếu người nhà đã gửi link thì bấm vào link đó. Vẫn tạo nhóm mới?")) return;
+  code = newCode(); store.set("nha", code); showNameScreen();
+};
+
+// ---------- Giữ mã nhà + tên trong đường link ----------
+// iPhone: "Thêm vào MH chính" lưu riêng, nên ghi sẵn mã nhà và tên vào link để app trên màn hình chính nhớ được.
+const isIOSBrowser = /iPhone|iPad|iPod/.test(navigator.userAgent) && !(matchMedia("(display-mode: standalone)").matches || navigator.standalone === true);
+function keepInUrl() {
+  if (!code) return;
+  let h = "#nha=" + code;
+  if (me && isIOSBrowser) h += "&ai=" + encodeURIComponent(JSON.stringify(me));
+  history.replaceState(null, "", location.pathname + h);
+}
+function meFromUrl() {
+  const m = location.hash.match(/[#&]ai=([^&]+)/);
+  if (!m) return null;
+  try {
+    const x = JSON.parse(decodeURIComponent(m[1]));
+    if (!x || !x.uid || !x.name) return null;
+    return { uid: String(x.uid).slice(0, 40), name: String(x.name).slice(0, 20), emoji: String(x.emoji || EMOJIS[0]).slice(0, 8) };
+  } catch { return null; }
+}
+// Nhóm lỡ tạo trùng thì chuyển về nhóm chính (mã nhóm chính được mã hoá bằng mã nhóm cũ).
+async function movedTo(c) {
+  const map = CFG.chuyenNha;
+  if (!map || !crypto.subtle) return c;
+  const sha = async (s) => new Uint8Array(await crypto.subtle.digest("SHA-256", new TextEncoder().encode(s)));
+  const id = Array.from(await sha("id:" + c), (x) => x.toString(16).padStart(2, "0")).join("").slice(0, 20);
+  const v = map[id];
+  if (!v) return c;
+  const k = await sha("key:" + c);
+  const out = String.fromCharCode(...v.match(/../g).map((h, i) => parseInt(h, 16) ^ k[i]));
+  if (!/^[A-Za-z0-9]{16,64}$/.test(out)) return c;
+  store.set("nha", out);
+  return out;
+}
 
 // ---------- Khởi động ----------
-code = readFamilyCode();
-try { me = JSON.parse(store.get("me") || "null"); } catch { me = null; }
-if (!code) show("scr-join");
-else if (!me) showNameScreen();
-else enterMain();
+(async () => {
+  code = readFamilyCode();
+  try { me = JSON.parse(store.get("me") || "null"); } catch { me = null; }
+  if (!me) { me = meFromUrl(); if (me) store.set("me", JSON.stringify(me)); }
+  if (code) { try { code = await movedTo(code); } catch {} }
+  if (!code) show("scr-join");
+  else if (!me) showNameScreen();
+  else enterMain();
+})();
 
 if ("serviceWorker" in navigator) navigator.serviceWorker.register("sw.js").catch(() => {});
