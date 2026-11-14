@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#16a34a">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon.svg">
+<link rel="apple-touch-icon" href="icon.svg">
+<title>Nhà mình</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Màn hình: chưa có mã gia đình -->
+<section id="scr-join" class="screen hidden">
+  <div class="center-box">
+    <div class="big-emoji">🏡</div>
+    <h1>Nhà mình</h1>
+    <p class="muted">Gọi video và nhắn tin cho cả nhà</p>
+    <button id="btn-create" class="btn btn-green">Tạo nhóm cho nhà mình</button>
+    <p class="muted small">Chỉ một người tạo, rồi gửi đường link cho cả nhà.<br>Ai được gửi link thì chỉ cần bấm vào link là xong.</p>
+  </div>
+</section>
+
+<!-- Màn hình: chọn tên -->
+<section id="scr-name" class="screen hidden">
+  <div class="center-box">
+    <h1>Bạn là ai trong nhà?</h1>
+    <input id="inp-name" class="inp" maxlength="20" placeholder="Ví dụ: Mẹ, Tài, Bé Na" autocomplete="off">
+    <p class="muted">Chọn hình đại diện</p>
+    <div id="emoji-pick" class="emoji-pick"></div>
+    <button id="btn-save-name" class="btn btn-green">Xong</button>
+  </div>
+</section>
+
+<!-- Màn hình chính -->
+<section id="scr-main" class="screen hidden">
+  <header class="top">
+    <div class="title"><span id="home-name">Nhà mình</span></div>
+    <button id="btn-menu" class="icon-btn" aria-label="Cài đặt">⚙️</button>
+  </header>
+  <div id="demo-banner" class="banner hidden">Đang chạy thử: tin nhắn chỉ lưu trên máy này.</div>
+  <button id="btn-call" class="btn btn-call">📞 Gọi cả nhà</button>
+  <div id="call-live" class="call-live hidden">
+    <span id="call-live-text">Đang có cuộc gọi</span>
+    <button id="btn-join-live" class="btn btn-green btn-small">Vào ngay</button>
+  </div>
+  <main id="msgs" class="msgs"></main>
+  <form id="send-form" class="send">
+    <textarea id="inp-msg" rows="1" placeholder="Nhắn cho cả nhà..."></textarea>
+    <button class="send-btn" aria-label="Gửi">➤</button>
+  </form>
+</section>
+
+<!-- Màn hình gọi video -->
+<section id="scr-call" class="screen hidden">
+  <div id="jitsi" class="jitsi"></div>
+  <button id="btn-hangup" class="btn btn-red hangup">Tắt máy</button>
+</section>
+
+<!-- Cài đặt -->
+<div id="menu" class="modal hidden">
+  <div class="sheet">
+    <h2>Mời người nhà</h2>
+    <p class="muted">Gửi đường link này qua Zalo cho người nhà. Ai có link là vào được nhóm, nên đừng gửi cho người ngoài.</p>
+    <div id="invite-link" class="link-box"></div>
+    <button id="btn-share" class="btn btn-green">Gửi link cho người nhà</button>
+    <button id="btn-rename" class="btn btn-gray">Đổi tên của tôi</button>
+    <button id="btn-close-menu" class="btn btn-gray">Đóng</button>
+  </div>
+</div>
+
+<div id="toast" class="toast hidden"></div>
+
+<script src="config.js"></script>
+<script type="module" src="app.js"></script>
+</body>
+</html>
