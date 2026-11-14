@@ -68,7 +68,7 @@ export async function setupPush(code, me) {
 export function notifyFamily(code, me, title, body, kind) {
   if (!CFG.pushServer) return;
   fetch(CFG.pushServer + "/notify", {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST", headers: { "Content-Type": "application/json" }, keepalive: true,
     body: JSON.stringify({ fam: code, uid: me.uid, title, body, kind }),
   }).catch(() => {});
 }
