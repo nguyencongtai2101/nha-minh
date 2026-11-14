@@ -1,7 +1,7 @@
 // Nhà mình: nhắn tin + gọi video cho gia đình.
 import { CFG, $, EMOJIS, CALL_FRESH_MIN, store, readFamilyCode, newCode, inviteLink, hasFirebase, makeBackend, toast } from "./lib.js";
 import { renderList } from "./render.js";
-import { openCall, closeCall } from "./call.js";
+import { openCall, closeCall, callPageUrl } from "./call.js";
 import { setupPush, notifyFamily } from "./push.js";
 
 // ---------- Giao diện ----------
@@ -38,7 +38,18 @@ function onMessages(list) {
 document.addEventListener("visibilitychange", () => { if (!document.hidden) document.title = CFG.tenNha || "Nhà mình"; });
 
 // ---------- Gọi video ----------
+const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
 async function startCall(announce) {
+  if (isIOS) {
+    if (announce) {
+      notifyFamily(code, me, "📞 Gọi cả nhà", `${me.name} đang gọi cả nhà, bấm vào để nghe`, "call");
+      toast("Đang mở cuộc gọi...");
+      await Promise.race([backend.send({ type: "call", uid: me.uid, name: me.name, emoji: me.emoji, text: "" }).catch(() => {}),
+        new Promise((r) => setTimeout(r, 2500))]);
+    }
+    location.href = callPageUrl("NhaMinh" + code, `${me.emoji} ${me.name}`);
+    return;
+  }
   show("scr-call");
   if (announce) {
     backend.send({ type: "call", uid: me.uid, name: me.name, emoji: me.emoji, text: "" }).catch(() => {});
