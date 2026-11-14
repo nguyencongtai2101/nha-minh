@@ -9,5 +9,8 @@ window.NHA_MINH_CONFIG = {
   },
   // Máy chủ gọi video Jitsi miễn phí, không cần đăng nhập.
   jitsiDomain: "meet.ffmuc.net",
-  tenNha: "Nhà mình"
+  tenNha: "Nhà mình",
+  // Máy chủ nhỏ gửi thông báo khi app đang đóng (Cloudflare Worker).
+  pushServer: "https://nha-minh-push.nguyencongtai-hcb.workers.dev",
+  vapidPublic: "BP0W-hhmyDHbtuA4JqfvTtCVunxQioGa_1JgA5Et_tAjcT5pJjpIkGRt4pJw-K92CiBmQbQeZOimV03TctHkF40"
 };
