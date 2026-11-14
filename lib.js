@@ -12,7 +12,7 @@ export const store = {
 // ---------- Mã gia đình (nằm trong link mời) ----------
 export function readFamilyCode() {
   const m = location.hash.match(/nha=([A-Za-z0-9]{16,64})/);
-  if (m) { store.set("nha", m[1]); history.replaceState(null, "", location.pathname); return m[1]; }
+  if (m) { store.set("nha", m[1]); return m[1]; }
   return store.get("nha");
 }
 export function newCode() {
