@@ -28,6 +28,14 @@ export async function openCall(roomName, displayName, onEnd) {
   jitsi.addListener("videoConferenceLeft", onEnd);
 }
 
+// iPhone: gọi video trong khung nhúng hay bị mất hình/tiếng, nên mở thẳng trang gọi.
+export function callPageUrl(roomName, displayName) {
+  const q = (v) => encodeURIComponent(JSON.stringify(v));
+  return `https://${CFG.jitsiDomain}/${encodeURIComponent(roomName)}#config.prejoinConfig.enabled=false&config.prejoinPageEnabled=false` +
+    `&config.disableDeepLinking=true&config.startWithAudioMuted=false&config.startWithVideoMuted=false` +
+    `&config.defaultLanguage=${q("vi")}&userInfo.displayName=${q(displayName)}`;
+}
+
 export function closeCall() {
   if (jitsi) { try { jitsi.executeCommand("hangup"); } catch {} try { jitsi.dispose(); } catch {} jitsi = null; }
   $("jitsi").innerHTML = "";
