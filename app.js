@@ -2,6 +2,7 @@
 import { CFG, $, EMOJIS, CALL_FRESH_MIN, store, readFamilyCode, newCode, inviteLink, hasFirebase, makeBackend, toast } from "./lib.js";
 import { renderList } from "./render.js";
 import { openCall, closeCall } from "./call.js";
+import { setupPush, notifyFamily } from "./push.js";
 
 // ---------- Giao diện ----------
 let me = null, code = null, backend = null, messages = [], firstLoad = true;
@@ -39,7 +40,10 @@ document.addEventListener("visibilitychange", () => { if (!document.hidden) docu
 // ---------- Gọi video ----------
 async function startCall(announce) {
   show("scr-call");
-  if (announce) backend.send({ type: "call", uid: me.uid, name: me.name, emoji: me.emoji, text: "" }).catch(() => {});
+  if (announce) {
+    backend.send({ type: "call", uid: me.uid, name: me.name, emoji: me.emoji, text: "" }).catch(() => {});
+    notifyFamily(code, me, "📞 Gọi cả nhà", `${me.name} đang gọi cả nhà, bấm vào để nghe`, "call");
+  }
   try { await openCall("NhaMinh" + code, `${me.emoji} ${me.name}`, endCall); }
   catch { toast("Không mở được cuộc gọi, kiểm tra mạng nhé"); endCall(); }
 }
@@ -73,9 +77,9 @@ async function enterMain() {
   $("home-name").textContent = CFG.tenNha || "Nhà mình";
   $("demo-banner").classList.toggle("hidden", hasFirebase);
   if (!backend) {
-    try { backend = await makeBackend(code, onMessages); }
+    try { backend = await makeBackend(code, onMessages); setupPush(code, me); }
     catch (e) { console.error(e); toast("Không kết nối được, thử tải lại trang"); }
-  } else renderMessages();
+  } else { renderMessages(); setupPush(code, me); }
 }
 
 $("send-form").onsubmit = (e) => {
@@ -83,6 +87,7 @@ $("send-form").onsubmit = (e) => {
   const t = $("inp-msg").value.trim();
   if (!t || !backend) return;
   backend.send({ type: "text", uid: me.uid, name: me.name, emoji: me.emoji, text: t.slice(0, 1500) })
+    .then(() => notifyFamily(code, me, `${me.emoji} ${me.name}`, t.slice(0, 200), "text"))
     .catch(() => toast("Chưa gửi được, thử lại nhé"));
   $("inp-msg").value = ""; autosize();
 };
